@@ -1,5 +1,8 @@
 package com.bibliotecasduocuc.servicio;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.*;
 
 import com.bibliotecasduocuc.excepciones.*;
@@ -128,8 +131,8 @@ public class Biblioteca {
         String rutaLibros = "src/main/java/com/bibliotecasduocuc/data/libros.csv";
         String rutaUsuarios = "src/main/java/com/bibliotecasduocuc/data/usuarios.csv";
         // Cargar libros y usuarios desde archivos
-        importLibrosToSystem(rutaLibros);
-        importUsuariosToSystem(rutaUsuarios);
+        silentImportLibros(rutaLibros);
+        silentUserImport(rutaUsuarios);
     }
 
     /**
@@ -139,12 +142,27 @@ public class Biblioteca {
      */
     public void importLibrosToSystem(String rutaArchivo) {
         try {
+            File file = new File(rutaArchivo);
+            if (!file.exists()) {
+                System.out.println("El archivo no existe: " + rutaArchivo);
+                return;
+            }
+
             List<Libro> libros = UtilArchivos.cargarLibros(rutaArchivo);
+            if (libros == null || libros.isEmpty()) {
+                System.out.println("No se encontraron datos en el archivo.");
+                return;
+            }
             // Mapa para buscar libros existentes por ISBN
             Set<String> isbnsExistentes = new HashSet<>();
             for (Ejemplar e : ejemplares) {
                 isbnsExistentes.add(e.getLibro().getIsbn());
             }
+            if (libros.isEmpty()) {
+                System.out.println("No se encontraron libros en el archivo.");
+                return;
+            }
+
             int agregados = 0;
             for (Libro libro : libros) {
                 if (!isbnsExistentes.contains(libro.getIsbn())) {
@@ -156,8 +174,38 @@ public class Biblioteca {
                 }
             }
             System.out.println("Ejemplares importados: " + agregados);
-        } catch (Exception e) {
+        } catch (FileNotFoundException e) {
+            System.out.println("Archivo no encontrado: " + e.getMessage());
+        } catch (IOException e) {
             System.out.println("Error al importar libros: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Error inesperado al importar libros: " + e.getMessage());
+        }
+    }
+
+    public void silentImportLibros(String rutaArchivo) {
+        try {
+
+            List<Libro> libros = UtilArchivos.cargarLibros(rutaArchivo);
+            Set<String> isbnsExistentes = new HashSet<>();
+
+            for (Ejemplar e : ejemplares) {
+                isbnsExistentes.add(e.getLibro().getIsbn());
+            }
+            for (Libro libro : libros) {
+                if (!isbnsExistentes.contains(libro.getIsbn())) {
+                    ejemplares.add(new Ejemplar(libro));
+                    isbnsExistentes.add(libro.getIsbn());
+                } else {
+                    continue;
+                }
+            }
+        } catch (FileNotFoundException e) {
+            System.out.println("Archivo no encontrado: " + e.getMessage());
+        } catch (IOException e) {
+            System.out.println("Error al importar libros: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Error inesperado al importar libros: " + e.getMessage());
         }
     }
 
@@ -166,13 +214,55 @@ public class Biblioteca {
      * 
      * @param rutaArchivo Ruta del archivo desde donde se importarán los usuarios.
      */
-    public void importUsuariosToSystem(String rutaArchivo) {
+    public void importUsuariosToSystem(String rutaArchivo) throws IOException{
         try {
+            File file = new File(rutaArchivo);
+            if (!file.exists()) {
+                System.out.println("El archivo no existe: " + rutaArchivo);
+                return;
+            }
+            // Mapa para buscar usuarios existentes por ID
+            Set<String> idsExistentes = new HashSet<>();
+            for (Usuario u : usuarios.values()) {
+                idsExistentes.add(u.getId());
+            }
+            // Cargar los usuarios desde el archivo
             Map<String, Usuario> nuevosUsuarios = UtilArchivos.cargarUsuarios(rutaArchivo);
+            // comparar los nuevos usuarios con los existentes
+            if (nuevosUsuarios == null || nuevosUsuarios.isEmpty()) {
+                System.out.println("No se encontraron datos en el archivo.");
+                // Si no hay usuarios en el archivo, no se agrega nada
+                return;
+            }
+            // Agregar los nuevos usuarios al mapa de usuarios
             agregarUsuarios(nuevosUsuarios);
             System.out.println("Usuarios importados correctamente.");
-        } catch (Exception e) {
+
+        } catch (FileNotFoundException e) {
+            System.out.println("Archivo no encontrado: " + e.getMessage());
+        } catch (IOException e) {
             System.out.println("Error al importar usuarios: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Error inesperado al importar usuarios: " + e.getMessage());
+        }
+    }
+
+    public void silentUserImport(String rutaArchivo) {
+        try {
+            Map<String, Usuario> nuevosUsuarios = UtilArchivos.cargarUsuarios(rutaArchivo);
+            if (nuevosUsuarios == null || nuevosUsuarios.isEmpty()) {
+                System.out.println("No se encontraron datos en el archivo.");
+                return;
+                
+            } else {
+                agregarUsuarios(nuevosUsuarios);
+            }
+        } catch (FileNotFoundException e) {
+            System.out.println("Archivo no encontrado: " + e.getMessage());
+        } catch (IOException e) {
+            System.out.println("Error al importar usuarios: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Error inesperado al importar usuarios: " + e.getMessage());
         }
     }
 

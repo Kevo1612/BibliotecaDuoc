@@ -61,8 +61,8 @@ public class UtilArchivos {
                     usuarios.put(id, new Usuario(id, nombre));
                 }
             }
+            return usuarios;
         }
-        return usuarios;
     }
 
        /**

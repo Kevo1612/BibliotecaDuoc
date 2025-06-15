@@ -1,6 +1,7 @@
 package com.bibliotecasduocuc;
 
 import java.util.*;
+import java.io.IOException;
 
 import com.bibliotecasduocuc.servicio.*;
 import com.bibliotecasduocuc.excepciones.*;
@@ -24,9 +25,8 @@ public class App {
      */
     public void run() {
         boolean salir = false;
-
-        // Inicialización de la biblioteca con datos de ejemplo
-        bibliotecaInit();
+        // Datos de ejemplo
+        biblioteca.cargarDatos();
         // Iteración del menú principal
         while (!salir) {
             menu.mainMenu();
@@ -46,20 +46,6 @@ public class App {
             }
         }
         scanner.close();
-    }
-
-    /**
-     * Método para inicializar la biblioteca con datos de ejemplo.
-     * Muestra un mensaje de bienvenida y carga los datos iniciales.
-     */
-    public void bibliotecaInit() {
-        System.out.println("=== BIENVENIDO AL SISTEMA DE BIBLIOTECAS DUOC ===");
-        System.out.println("-".repeat(50));
-        System.out.println("\nCargando datos...\n");
-        // Cargar datos iniciales
-        biblioteca.cargarDatos();
-        System.out.println("\nInicialización completa.");
-        System.out.println("-".repeat(50));
     }
 
     /**
@@ -124,45 +110,14 @@ public class App {
         menu.importSubMenu();
         int opcionImport = leerOpcion();
         switch (opcionImport) {
-            case 1 -> {
-                // Se puede usar el archivo
-                // 'src/main/java/com/bibliotecasduocuc/data/libros_carga_manual.csv'
-                System.out.print("Ruta del archivo de libros: ");
-                String rutaLibros = scanner.nextLine();
-                biblioteca.importLibrosToSystem(rutaLibros);
-            }
-            case 2 -> {
-                System.out.print("Título del libro: ");
-                String titulo = scanner.nextLine();
-                System.out.print("Autor del libro: ");
-                String autor = scanner.nextLine();
-                System.out.print("ISBN del libro: ");
-                String isbnNuevo = scanner.nextLine();
-                biblioteca.agregarLibros(List.of(new Libro(titulo, autor, isbnNuevo)));
-                System.out.println("Libro agregado correctamente.");
-            }
-            case 3 -> {
-                // Se puede usar el archivo
-                // 'src/main/java/com/bibliotecasduocuc/data/usuarios_carga_manual.csv'
-                System.out.println("Ruta del archivo de usuarios: ");
-                String rutaUsuarios = scanner.nextLine();
-                biblioteca.importUsuariosToSystem(rutaUsuarios);
-            }
-
-            case 4 -> {
-                System.out.print("ID del usuario: ");
-                String idUsuarioNuevo = scanner.nextLine();
-                System.out.print("Nombre del usuario: ");
-                String nombreUsuario = scanner.nextLine();
-                biblioteca.agregarUsuarios(
-                        Map.of(idUsuarioNuevo, new Usuario(idUsuarioNuevo, nombreUsuario)));
-                System.out.println("Usuario agregado correctamente.");
-            }
+            case 1 -> cargaMasiva("libros");
+            case 2 -> registraLibro();
+            case 3 -> cargaMasiva("usuarios");
+            case 4 -> registraUsuario();
             case 5 -> System.out.println("\nVolviendo al menú principal...");
             default -> System.out.println("Opción no válida.");
         }
     }
-
     /**
      * Muestra el menú de exportación de datos y maneja las opciones seleccionadas.
      * Permite exportar libros, usuarios y préstamos a archivos.
@@ -195,4 +150,57 @@ public class App {
             default -> System.out.println("Opción no válida.");
         }
     }
+    
+    /**
+     * Realiza una carga masiva de datos desde un archivo.
+     * Dependiendo del tipo de datos (usuarios o libros), importa los datos desde
+     * el archivo especificado por el usuario.
+     *
+     * @param tipo El tipo de datos a importar ("usuarios" o "libros").
+     *             El usuario debe proporcionar la ruta del archivo correspondiente.
+     *             Si el tipo no es válido, se muestra un mensaje de error.
+     * @throws IOException Si ocurre un error al leer el archivo.
+     */
+    private void cargaMasiva(String tipo){
+        System.out.println("Ruta del archivo "+tipo+": ");
+        String ruta = scanner.nextLine();
+        try {
+            if (tipo.equals("usuarios")) {
+                biblioteca.importUsuariosToSystem(ruta);
+            } else if (tipo.equals("libros")) {
+                biblioteca.importLibrosToSystem(ruta);
+            } else {
+                System.out.println("Tipo de carga masiva no válido.");
+            }
+        } catch (IOException e) {
+            System.out.println("Error al importar datos de "+tipo+": " + e.getMessage());
+        }
+    }
+
+    private void registraLibro() {
+        System.out.print("Título del libro: ");
+        String titulo = scanner.nextLine();
+        System.out.print("Autor del libro: ");
+        String autor = scanner.nextLine();
+        System.out.print("ISBN del libro: ");
+        String isbnNuevo = scanner.nextLine();
+        biblioteca.agregarLibros(List.of(new Libro(titulo, autor, isbnNuevo)));
+        System.out.println("Libro agregado correctamente.");
+    }
+
+    private void registraUsuario() {
+        System.out.print("ID del usuario: ");
+        String idUsuarioNuevo = scanner.nextLine();
+        System.out.print("Nombre del usuario: ");
+        String nombreUsuario = scanner.nextLine();
+        if (idUsuarioNuevo.isEmpty() || nombreUsuario.isEmpty()) {
+            System.out.println("ID y nombre de usuario no pueden estar vacíos.");
+            return;
+        } else {
+            biblioteca.agregarUsuarios(
+                    Map.of(idUsuarioNuevo, new Usuario(idUsuarioNuevo, nombreUsuario)));
+            System.out.println("Usuario agregado correctamente.");
+        }
+    }
+
 }
