@@ -1,5 +1,9 @@
 package com.bibliotecasduocuc.modelo;
 
+/**
+ * Clase Usuario que representa un usuario de la biblioteca.
+ * Contiene atributos como ID y nombre del usuario.
+ */
 public class Usuario {
     private String id;
     private String nombre;

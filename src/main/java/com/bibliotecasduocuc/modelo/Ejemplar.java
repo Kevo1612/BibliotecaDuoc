@@ -1,5 +1,11 @@
 package com.bibliotecasduocuc.modelo;
 
+/**
+ * Clase Ejemplar que representa un ejemplar de un libro en la biblioteca.
+ * Cada ejemplar está asociado a un libro y tiene un estado de disponibilidad.
+ * Permite prestar y devolver el ejemplar, y verificar su disponibilidad.
+ */
+
 public class Ejemplar {
     private Libro libro;
     private boolean disponible = true;

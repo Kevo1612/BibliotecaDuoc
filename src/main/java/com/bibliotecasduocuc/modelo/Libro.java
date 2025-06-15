@@ -1,5 +1,9 @@
 package com.bibliotecasduocuc.modelo;
 
+/**
+ * Clase Libro que representa un libro en la biblioteca.
+ * Contiene atributos como título, autor e ISBN.
+ */
 public class Libro {
     private String titulo;
     private String autor;
