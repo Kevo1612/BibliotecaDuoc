@@ -1,0 +1,198 @@
+package com.bibliotecasduocuc;
+
+import java.util.*;
+
+import com.bibliotecasduocuc.servicio.*;
+import com.bibliotecasduocuc.excepciones.*;
+import com.bibliotecasduocuc.modelo.*;
+
+/**
+ * Clase principal de la aplicación Biblioteca.
+ * Esta clase contiene el método run que inicia la aplicación y gestiona el menú
+ * principal.
+ */
+public class App {
+
+    private final Scanner scanner = new Scanner(System.in);
+    private final Biblioteca biblioteca = new Biblioteca();
+    private final Menu menu = new Menu();
+
+    /**
+     * Método principal que inicia la aplicación y gestiona el menú.
+     * Carga los datos iniciales y permite al usuario interactuar con el sistema
+     * a través de un menú.
+     */
+    public void run() {
+        boolean salir = false;
+
+        // Inicialización de la biblioteca con datos de ejemplo
+        bibliotecaInit();
+        // Iteración del menú principal
+        while (!salir) {
+            menu.mainMenu();
+            int opcionMain = leerOpcion();
+            switch (opcionMain) {
+                case 1 -> realizarPrestamo();
+                case 2 -> realizarDevolucion();
+                case 3 -> menuImportacion();
+                case 4 -> menuExportacion();
+                case 5 -> menuVisualizacion();
+                case 6 -> {
+                    menu.exitMenu();
+                    salir = true;
+                    break;
+                }
+                default -> System.out.println("Opción no válida. Por favor, intente de nuevo.");
+            }
+        }
+        scanner.close();
+    }
+
+    /**
+     * Método para inicializar la biblioteca con datos de ejemplo.
+     * Muestra un mensaje de bienvenida y carga los datos iniciales.
+     */
+    public void bibliotecaInit() {
+        System.out.println("=== BIENVENIDO AL SISTEMA DE BIBLIOTECAS DUOC ===");
+        System.out.println("-".repeat(50));
+        System.out.println("\nCargando datos...\n");
+        // Cargar datos iniciales
+        biblioteca.cargarDatos();
+        System.out.println("\nInicialización completa.");
+        System.out.println("-".repeat(50));
+    }
+
+    /**
+     * Lee una opción del usuario y maneja excepciones de entrada.
+     * 
+     * @return La opción leída como un entero.
+     */
+    private int leerOpcion() {
+        int op = -1;
+        while (true) {
+            try {
+                op = scanner.nextInt();
+                scanner.nextLine();
+                break;
+            } catch (InputMismatchException e) {
+                System.out.println("Entrada no válida. Por favor, ingrese un número.");
+                scanner.next(); // Limpiar la entrada no válida
+            }
+        }
+        return op;
+    }
+
+    /**
+     * Realiza el préstamo de un libro a un usuario.
+     * Solicita el ISBN del libro y el ID del usuario, y realiza el préstamo.
+     */
+    private void realizarPrestamo() {
+        System.out.print("ISBN del libro: ");
+        String isbn = scanner.nextLine();
+        System.out.print("ID del usuario: ");
+        String idUsuario = scanner.nextLine();
+        try {
+            biblioteca.prestarLibro(isbn, idUsuario);
+        } catch (LibroNoEncontradoException | LibroYaPrestadoException e) {
+            System.out.println("Error: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Error al realizar el préstamo: " + e.getMessage());
+        }
+
+    }
+
+    /**
+     * Realiza la devolución de un libro.
+     */
+    private void realizarDevolucion() {
+        System.out.print("ISBN del libro a devolver: ");
+        String isbnDev = scanner.nextLine();
+        try {
+            biblioteca.devolverLibro(isbnDev);
+        } catch (LibroNoEncontradoException | LibroNoPrestadoException e) {
+            System.out.println("Error: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Error al realizar la devolución: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Muestra el menú de importación de datos y maneja las opciones seleccionadas.
+     * Permite importar libros y usuarios desde archivos o agregarlos manualmente.
+     */
+    private void menuImportacion() {
+        menu.importSubMenu();
+        int opcionImport = leerOpcion();
+        switch (opcionImport) {
+            case 1 -> {
+                // Se puede usar el archivo
+                // 'src/main/java/com/bibliotecasduocuc/data/libros_carga_manual.csv'
+                System.out.print("Ruta del archivo de libros: ");
+                String rutaLibros = scanner.nextLine();
+                biblioteca.importLibrosToSystem(rutaLibros);
+            }
+            case 2 -> {
+                System.out.print("Título del libro: ");
+                String titulo = scanner.nextLine();
+                System.out.print("Autor del libro: ");
+                String autor = scanner.nextLine();
+                System.out.print("ISBN del libro: ");
+                String isbnNuevo = scanner.nextLine();
+                biblioteca.agregarLibros(List.of(new Libro(titulo, autor, isbnNuevo)));
+                System.out.println("Libro agregado correctamente.");
+            }
+            case 3 -> {
+                // Se puede usar el archivo
+                // 'src/main/java/com/bibliotecasduocuc/data/usuarios_carga_manual.csv'
+                System.out.println("Ruta del archivo de usuarios: ");
+                String rutaUsuarios = scanner.nextLine();
+                biblioteca.importUsuariosToSystem(rutaUsuarios);
+            }
+
+            case 4 -> {
+                System.out.print("ID del usuario: ");
+                String idUsuarioNuevo = scanner.nextLine();
+                System.out.print("Nombre del usuario: ");
+                String nombreUsuario = scanner.nextLine();
+                biblioteca.agregarUsuarios(
+                        Map.of(idUsuarioNuevo, new Usuario(idUsuarioNuevo, nombreUsuario)));
+                System.out.println("Usuario agregado correctamente.");
+            }
+            case 5 -> System.out.println("\nVolviendo al menú principal...");
+            default -> System.out.println("Opción no válida.");
+        }
+    }
+
+    /**
+     * Muestra el menú de exportación de datos y maneja las opciones seleccionadas.
+     * Permite exportar libros, usuarios y préstamos a archivos.
+     */
+    private void menuExportacion() {
+        menu.exportSubMenu();
+        int opcionExport = leerOpcion();
+        switch (opcionExport) {
+            case 1 -> biblioteca.exportLibrosToFile();
+            case 2 -> biblioteca.exportUsuariosToFile();
+            case 3 -> biblioteca.exportPrestamosToFile();
+            case 4 -> System.out.println("\nVolviendo al menú principal...");
+            default -> System.out.println("Opción no válida.");
+        }
+    }
+
+    /**
+     * Muestra el menú de visualización de datos y maneja las opciones
+     * seleccionadas.
+     * Permite listar libros, usuarios y préstamos.
+     */
+    private void menuVisualizacion() {
+        menu.viewSubMenu();
+        int opcionView = leerOpcion();
+        switch (opcionView) {
+            case 1 -> biblioteca.listarLibros();
+            case 2 -> biblioteca.listarUsuarios();
+            case 3 -> biblioteca.listarPrestamos();
+            case 4 -> System.out.println("\nVolviendo al menú principal...");
+            default -> System.out.println("Opción no válida.");
+        }
+    }
+}
