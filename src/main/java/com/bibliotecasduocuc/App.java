@@ -1,7 +1,11 @@
 package com.bibliotecasduocuc;
 
-import java.util.*;
+
 import java.io.IOException;
+import java.util.InputMismatchException;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
 
 import com.bibliotecasduocuc.servicio.*;
 import com.bibliotecasduocuc.excepciones.*;
@@ -144,9 +148,14 @@ public class App {
         int opcionView = leerOpcion();
         switch (opcionView) {
             case 1 -> biblioteca.listarLibros();
-            case 2 -> biblioteca.listarUsuarios();
-            case 3 -> biblioteca.listarPrestamos();
-            case 4 -> System.out.println("\nVolviendo al menú principal...");
+            case 2 -> biblioteca.listarLibrosOrdenadosPorTitulo();
+            case 3 -> biblioteca.listarLibrosOrdenadosPorAutor();
+            case 4 -> biblioteca.listarUsuarios();
+            case 5 -> biblioteca.listarUsuariosPorID();
+            case 6 -> biblioteca.listarUsuariosPorNombre();
+            case 7 -> biblioteca.listarUsuariosPorApellido();
+            case 8 -> biblioteca.listarPrestamos();
+            case 9 -> System.out.println("\nVolviendo al menú principal...");
             default -> System.out.println("Opción no válida.");
         }
     }
@@ -177,6 +186,10 @@ public class App {
         }
     }
 
+    /**
+     * Registra un nuevo libro en el sistema.
+     * Solicita el título, autor e ISBN del libro, y lo agrega al sistema.
+     */
     private void registraLibro() {
         System.out.print("Título del libro: ");
         String titulo = scanner.nextLine();
@@ -188,6 +201,10 @@ public class App {
         System.out.println("Libro agregado correctamente.");
     }
 
+/**
+     * Registra un nuevo usuario en el sistema.
+     * Solicita el ID y el nombre del usuario, y lo agrega al sistema.
+     */
     private void registraUsuario() {
         System.out.print("ID del usuario: ");
         String idUsuarioNuevo = scanner.nextLine();

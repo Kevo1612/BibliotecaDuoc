@@ -3,7 +3,14 @@ package com.bibliotecasduocuc.servicio;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import com.bibliotecasduocuc.excepciones.*;
 import com.bibliotecasduocuc.modelo.*;
@@ -211,10 +218,9 @@ public class Biblioteca {
 
     /**
      * Este método importa usuarios desde un archivo y los agrega al sistema.
-     * 
      * @param rutaArchivo Ruta del archivo desde donde se importarán los usuarios.
      */
-    public void importUsuariosToSystem(String rutaArchivo) throws IOException{
+    public void importUsuariosToSystem(String rutaArchivo) throws IOException {
         try {
             File file = new File(rutaArchivo);
             if (!file.exists()) {
@@ -253,7 +259,6 @@ public class Biblioteca {
             if (nuevosUsuarios == null || nuevosUsuarios.isEmpty()) {
                 System.out.println("No se encontraron datos en el archivo.");
                 return;
-                
             } else {
                 agregarUsuarios(nuevosUsuarios);
             }
@@ -334,6 +339,62 @@ public class Biblioteca {
     }
 
     /**
+     * Este método lista todos los libros registrados en la biblioteca,
+     * ordenados por título de forma alfabética.
+     * Muestra el título, autor e ISBN de cada libro.
+     */
+    public void listarLibrosOrdenadosPorTitulo() {
+        Set<Libro> libtosOrdenados = new TreeSet<>(
+                Comparator.comparing(Libro::getTitulo, String.CASE_INSENSITIVE_ORDER));
+        for (Ejemplar e : ejemplares) {
+            libtosOrdenados.add(e.getLibro());
+        }
+        System.out.println("Lista de libros ordenados por título:");
+        System.out.println("-".repeat(90));
+        System.out.printf("%-45s %-25s %-20s%n", "Título", "Autor", "ISBN");
+        System.out.println("-".repeat(90));
+        if (libtosOrdenados.isEmpty()) {
+            System.out.println("No hay libros registrados.");
+            return;
+        } else {
+            for (Libro libro : libtosOrdenados) {
+                System.out.printf("%-45s %-25s %-20s%n",
+                        libro.getTitulo(),
+                        libro.getAutor(),
+                        libro.getIsbn());
+            }
+        }
+    }
+
+    /**
+     * Este método lista todos los libros registrados en la biblioteca,
+     * ordenados por autor de forma alfabética.
+     * Muestra el autor, título e ISBN de cada libro.
+     */
+    public void listarLibrosOrdenadosPorAutor() {
+        Set<Libro> librosOrdenados = new TreeSet<>(Comparator.comparing(Libro::getAutor, String.CASE_INSENSITIVE_ORDER)
+                .thenComparing(Libro::getTitulo, String.CASE_INSENSITIVE_ORDER));
+        for (Ejemplar e : ejemplares) {
+            librosOrdenados.add(e.getLibro());
+        }
+        System.out.println("Lista de libros ordenados por autor:");
+        System.out.println("-".repeat(90));
+        System.out.printf("%-25s %-45s %-20s%n", "Autor", "Título", "ISBN");
+        System.out.println("-".repeat(90));
+        if (librosOrdenados.isEmpty()) {
+            System.out.println("No hay libros registrados.");
+            return;
+        } else {
+            for (Libro libro : librosOrdenados) {
+                System.out.printf("%-25s %-45s %-20s%n",
+                        libro.getAutor(),
+                        libro.getTitulo(),
+                        libro.getIsbn());
+            }
+        }
+    }
+
+    /**
      * Este método lista todos los usuarios registrados en la biblioteca.
      * Muestra el ID y nombre de cada usuario.
      */
@@ -348,6 +409,75 @@ public class Biblioteca {
             for (Usuario u : usuarios.values()) {
                 System.out.printf("%-15s %-35s%n", u.getId(), u.getNombre());
             }
+        }
+        System.out.println("-".repeat(50));
+    }
+
+    /**
+     * Este método lista todos los usuarios registrados en la biblioteca,
+     * ordenados por ID de forma alfabética.
+     * Muestra el ID y nombre de cada usuario.
+     */
+    public void listarUsuariosPorID() {
+        Set<Usuario> usuariosOrdenados = new TreeSet<>(
+                Comparator.comparing(Usuario::getId, String.CASE_INSENSITIVE_ORDER));
+        usuariosOrdenados.addAll(usuarios.values());
+        System.out.println("Lista de usuarios ordenados por ID:");
+        System.out.println("-".repeat(50));
+        System.out.printf("%-15s %-35s%n", "ID", "Nombre Usuario");
+        System.out.println("-".repeat(50));
+        if (usuariosOrdenados.isEmpty()) {
+            System.out.println("No hay usuarios registrados.");
+            return;
+        } else {
+            for (Usuario u : usuariosOrdenados) {
+                System.out.printf("%-15s %-35s%n", u.getId(), u.getNombre());
+            }
+        }
+        System.out.println("-".repeat(50));
+    }
+
+    /**
+     * Este método lista todos los usuarios registrados en la biblioteca,
+     * ordenados por nombre de forma alfabética.
+     * Muestra el nombre y ID de cada usuario.
+     */
+    public void listarUsuariosPorNombre() {
+        Set<Usuario> usuariosOrdenados = new TreeSet<>(
+                Comparator.comparing(Usuario::getNombre, String.CASE_INSENSITIVE_ORDER));
+        usuariosOrdenados.addAll(usuarios.values());
+        System.out.println("Usuarios ordenados por nombre:");
+        System.out.println("-".repeat(50));
+        System.out.printf("%-35s %-15s%n", "Nombre Usuario", "ID");
+        System.out.println("-".repeat(50));
+        for (Usuario u : usuariosOrdenados) {
+            System.out.printf("%-35s %-15s%n", u.getNombre(), u.getId());
+        }
+        System.out.println("-".repeat(50));
+    }
+
+    /**
+     * Este método lista todos los usuarios registrados en la biblioteca,
+     * ordenados por apellido de forma alfabética.
+     * Muestra el nombre y ID de cada usuario.
+     */
+    public void listarUsuariosPorApellido() {
+        Set<Usuario> usuariosOrdenados = new TreeSet<>((u1, u2) -> {
+            String apellido1 = u1.getNombre().trim().substring(u1.getNombre().lastIndexOf(" ") + 1);
+            String apellido2 = u2.getNombre().trim().substring(u2.getNombre().lastIndexOf(" ") + 1);
+            int cmp = apellido1.compareToIgnoreCase(apellido2);
+            if (cmp == 0) {
+                return u1.getNombre().compareToIgnoreCase(u2.getNombre());
+            }
+            return cmp;
+        });
+        usuariosOrdenados.addAll(usuarios.values());
+        System.out.println("Usuarios ordenados por apellido:");
+        System.out.println("-".repeat(50));
+        System.out.printf("%-35s %-15s%n", "Nombre Usuario", "ID");
+        System.out.println("-".repeat(50));
+        for (Usuario u : usuariosOrdenados) {
+            System.out.printf("%-35s %-15s%n", u.getNombre(), u.getId());
         }
         System.out.println("-".repeat(50));
     }
